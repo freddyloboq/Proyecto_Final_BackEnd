@@ -14,7 +14,7 @@ CORS(app)
 
 
 ###################################################################################
-#           method POST para ADD
+#           method POST para ADD para contenedores
 ###################################################################################
 @app.route('/api/container/add_container', methods=['POST'])
 def containersPost():
@@ -48,7 +48,7 @@ def containersPost():
 
 
 ###################################################################################
-#           method PUT para EDIT
+#           method PUT para EDIT para contenedores
 ###################################################################################
 # @app.route('/api/container/edit_container/<int:id>', methods=['GET'])
 # def containersEdit(id):
@@ -83,7 +83,7 @@ def containersPost():
 
 
 ###################################################################################
-#           method PUT para UPDATE
+#           method PUT para UPDATE para contenedores
 ###################################################################################
 @app.route('/api/container/update_container/<int:id>', methods=['PUT'])
 def containersUpdate(id):
@@ -120,7 +120,7 @@ def containersUpdate(id):
     return jsonify({'result': result})
 
 ###################################################################################
-#           method GET para GET
+#           method GET para contenedores
 ###################################################################################
 
 
@@ -144,7 +144,7 @@ def containersGet():
 
 
 ###################################################################################
-#           method DELETE
+#           method DELETE para contenedores
 ###################################################################################
 @app.route('/api/container/delete_container/<int:id>', methods=['DELETE'])
 def containersDelete(id):
@@ -207,6 +207,133 @@ def create_notification():
         'notificationdate': notificationdate
     }
     return jsonify({'result': result})
+
+
+###################################################################################
+#           method GET para GET Compañia
+###################################################################################
+
+
+@app.route('/api/compania', methods=['GET'])
+def companyGet():
+
+    cur = mysql.connection.cursor()
+
+    cur.execute("SELECT * FROM company")
+    row_headers = [x[0]
+                   for x in cur.description]  # this will extract row headers
+    dataContainer = cur.fetchall()
+    json_data = []
+
+    for result in dataContainer:
+        json_data.append(dict(zip(row_headers, result)))
+    # dataJson = json.dumps(json_data)
+
+    return jsonify(json_data)
+    # return jsonify(dataJson)
+
+
+###################################################################################
+#           method POST para ADD para compañia
+###################################################################################
+@app.route('/api/compania/add_compania', methods=['POST'])
+def companyPost():
+    cur = mysql.connection.cursor()
+    businessName = request.get_json()['businessName']
+    rut = request.get_json()['rut']
+    email = request.get_json()['email']
+    phone1 = request.get_json()['phone1']
+    phone2 = request.get_json()['phone2']
+    address = request.get_json()['address']
+    regional = request.get_json()['regional']
+    commune = request.get_json()['commune']
+    registerDate = datetime.utcnow()
+
+    cur.execute("INSERT INTO company (businessName, rut, email, phone1, phone2,address,regional,commune, registerDate) VALUES ('" +
+                str(businessName) + "', '" +
+                str(rut) + "', '" +
+                str(email) + "', '" +
+                str(phone1) + "', '" +
+                str(phone2) + "', '" +
+                str(address) + "', '" +
+                str(regional) + "', '" +
+                str(commune) + "', '" +
+                str(registerDate) + "')")
+    mysql.connection.commit()
+
+    result = {
+        'businessName': businessName,
+        'rut': rut,
+        'email': email,
+        'phone1': phone1,
+        'phone2': phone2,
+        'address': address,
+        'regional': regional,
+        'commune': commune,
+        'registerDate': registerDate
+    }
+
+    return jsonify({'result': result})
+
+
+###################################################################################
+#           method PUT para UPDATE para contenedores
+###################################################################################
+@app.route('/api/compania/update_compania/<int:id>', methods=['PUT'])
+def companyUpdate(id):
+    if request.method == 'PUT':
+        cur = mysql.connection.cursor()
+        businessName = request.get_json()['businessName']
+        rut = request.get_json()['rut']
+        email = request.get_json()['email']
+        phone1 = request.get_json()['phone1']
+        phone2 = request.get_json()['phone2']
+        address = request.get_json()['address']
+        regional = request.get_json()['regional']
+        commune = request.get_json()['commune']
+        registerDate = datetime.utcnow()
+
+        cur.execute("""
+                UPDATE company
+                SET businessName = %s,
+                    rut = %s,
+                    email = %s,
+                    phone1 = %s,
+                    phone2 = %s,
+                    address = %s,
+                    regional = %s,
+                    commune = %s
+                WHERE companyId=%s
+            """, (businessName, rut, email, phone1, phone2, address, regional, commune, id,))
+        mysql.connection.commit()
+
+        result = {
+            'businessName': businessName,
+            'rut': rut,
+            'email': email,
+            'phone1': phone1,
+            'phone2': phone2,
+            'address': address,
+            'regional': regional,
+            'commune': commune,
+            'registerDate': registerDate
+        }
+
+        return jsonify({'result': result})
+
+
+###################################################################################
+#           method DELETE para compañia
+###################################################################################
+@app.route('/api/compania/delete_compania/<int:id>', methods=['DELETE'])
+def companyDelete(id):
+    cur = mysql.connection.cursor()
+
+    cur.execute('DELETE FROM company WHERE companyId=%s', (id,))
+    mysql.connection.commit()
+
+    print(id)
+    return jsonify({"id": id})
 
 
 if __name__ == '__main__':
